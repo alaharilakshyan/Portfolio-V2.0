@@ -17,20 +17,29 @@ const About = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">About Me</h2>
           <div className="w-20 h-1 bg-red-500 mx-auto mb-12"></div>
           
-          <div className="flex flex-col md:flex-row items-center gap-12">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 w-full">
             <motion.div 
-              className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden border-2 border-red-500/30 shadow-xl"
-              whileHover={{ scale: 1.02 }}
+              className="relative w-72 h-72 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-red-500/40 shadow-2xl"
+              whileHover={{ scale: 1.03 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+              style={{
+                boxShadow: '0 0 25px rgba(239, 68, 68, 0.3)'
+              }}
             >
-              <Image
-                src="/profile.jpg" // Replace with your image path
-                alt="Profile Picture"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority
-              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Image
+                  src="/about-image.jpg"
+                  alt="Profile Picture"
+                  width={400}
+                  height={400}
+                  className="object-cover w-full h-full"
+                  style={{
+                    objectPosition: 'center 25%',
+                    transform: 'scale(1.1)'
+                  }}
+                  priority
+                />
+              </div>
             </motion.div>
             <div className="flex-1 max-w-2xl">
               <p className="text-gray-300 text-lg leading-relaxed">

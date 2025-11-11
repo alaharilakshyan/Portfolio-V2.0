@@ -61,8 +61,8 @@ const Hero = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            Hi, I'm <span className="text-red-500">Your Name</span>
+          <h1 className="text-5xl md:text-5xl font-bold mb-4">
+            Hi, I'm <span className="text-red-500">Lakshyan Alahari</span>
           </h1>
           <h2 className="text-2xl md:text-3xl text-gray-300 mb-6">
             Web Developer & Designer

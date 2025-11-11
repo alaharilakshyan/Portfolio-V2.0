@@ -32,16 +32,29 @@ const Navbar = () => {
       // Get all sections
       const sections = ['home', 'about', 'skills', 'experience', 'projects', 'contact'];
       
+      // Special case for home section (top of page)
+      if (window.scrollY <= 10) {
+        setActiveSection('home');
+        return;
+      }
+      
       // Find the section in view
+      let currentSection = 'home';
       for (const section of sections) {
         const element = document.getElementById(section);
         if (element) {
           const rect = element.getBoundingClientRect();
-          if (rect.top <= 100 && rect.bottom >= 100) {
-            setActiveSection(section);
+          // If element is in viewport (with some threshold)
+          if (rect.top <= 120 && rect.bottom >= 120) {
+            currentSection = section;
             break;
           }
         }
+      }
+      
+      // Only update if we found a new section
+      if (currentSection !== activeSection) {
+        setActiveSection(currentSection);
       }
     };
     
@@ -64,20 +77,41 @@ const Navbar = () => {
     setIsMobileMenuOpen(prev => !prev);
   };
 
-  const handleNavClick = (sectionId: string) => {
+  const handleNavClick = (sectionId: string, e: React.MouseEvent) => {
+    e.preventDefault();
     setActiveSection(sectionId);
     setIsMobileMenuOpen(false);
+    
+    if (sectionId === 'home') {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    } else {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        const headerOffset = 80; // Adjust this value based on your header height
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
   };
 
   // Nav item component
   const NavItem = ({ item }: { item: typeof navItems[0] }) => (
     <Link
       href={item.href}
-      onClick={() => handleNavClick(item.id)}
+      onClick={(e) => handleNavClick(item.id, e)}
       className={`flex items-center p-3 text-gray-300 hover:text-white hover:bg-red-900/30 rounded-full transition-all group ${
         activeSection === item.id ? 'text-red-500' : ''
       }`}
       scroll={false}
+      aria-label={item.name}
     >
       <div className="relative">
         {item.icon}
