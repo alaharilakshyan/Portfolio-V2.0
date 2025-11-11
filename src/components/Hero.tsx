@@ -1,190 +1,139 @@
+// src/components/Hero.tsx
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import dynamic from 'next/dynamic';
-import SocialIcons from './SocialIcons';
-import LoadingAnimation from './LoadingAnimation';
+import { useState, useCallback } from "react";
+import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 
-// Dynamically import Spline to avoid SSR issues
-const Spline = dynamic(() => import('@splinetool/react-spline'), { 
-  ssr: false
-});
+// Import Spline with proper type definitions
+const Spline = dynamic(() => import('@splinetool/react-spline'), {
+  ssr: false,
+  loading: () => <div>Loading 3D model...</div>
+}) as any; // Temporary type assertion to bypass TypeScript errors
+
+// ✅ Loader animation
+const SplineLoader = () => (
+  <div className="absolute inset-0 flex items-center justify-center">
+    <div className="relative w-16 h-16">
+      <div className="absolute inset-0 border-4 border-transparent border-t-red-500 rounded-full animate-spin" />
+      <div
+        className="absolute inset-2 border-4 border-transparent border-b-blue-500 rounded-full animate-spin"
+        style={{ animationDelay: "0.15s" }}
+      />
+      <div
+        className="absolute inset-4 border-4 border-transparent border-l-green-500 rounded-full animate-spin"
+        style={{ animationDelay: "0.3s" }}
+      />
+    </div>
+  </div>
+);
 
 const Hero = () => {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
   const [isLoading, setIsLoading] = useState(true);
-  const [splineLoaded, setSplineLoaded] = useState(false);
-  const [showContent, setShowContent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Initial loading delay to show the animation
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
+  const handleLoad = useCallback(() => {
+    console.log("Spline loaded successfully");
+    setIsLoading(false);
+    setError(null);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && splineLoaded) {
-      setShowContent(true);
-    }
-  }, [isLoading, splineLoaded]);
-
-  const handleSplineLoad = () => {
-    setSplineLoaded(true);
-  };
+  const handleError = useCallback((event: any) => {
+    const error = event?.error || new Error('Failed to load 3D content');
+    console.error("Spline error:", error);
+    setError("3D content failed to load. Please try refreshing the page.");
+    setIsLoading(false);
+  }, []);
 
   return (
     <section className="min-h-screen flex items-center bg-black text-white relative overflow-hidden">
-      {/* Full-screen loading overlay */}
-      <AnimatePresence>
-        {isLoading && (
-          <motion.div 
-            className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center gap-4"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <LoadingAnimation size="lg" />
-            <motion.p 
-              className="text-red-400 text-sm mt-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              Loading your experience...
-            </motion.p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Subtle background grid */}
+      <div
+        className="absolute inset-0 bg-grid-white/[0.05] pointer-events-none"
+        aria-hidden="true"
+      />
 
-      <div className="absolute inset-0 bg-grid-white/[0.05]" />
-      
-      <motion.div 
-        className={`container mx-auto px-4 py-20 md:py-0 flex flex-col md:flex-row items-center justify-between min-h-[calc(100vh-80px)] ${
-          showContent ? 'opacity-100' : 'opacity-0'
-        } transition-opacity duration-500`}
-      >
+      <div className="container mx-auto px-4 py-20 md:py-0 flex flex-col md:flex-row items-center justify-between min-h-[calc(100vh-80px)]">
         {/* Left side - Text content */}
-        <div className="md:w-1/2 text-center md:text-left z-10">
-          <motion.h1 
-            className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            Hi, I'm <span className="text-red-500">Your Name</span>
-          </motion.h1>
-          
-          <motion.div
-            className="text-xl md:text-2xl text-gray-300 mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <span className="text-red-500">Full Stack Developer</span> & Tech Enthusiast
-          </motion.div>
-          
-          <motion.p 
-            className="text-gray-400 mb-8 max-w-lg mx-auto md:mx-0"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            I craft exceptional digital experiences with modern web technologies.
-            Currently focused on building responsive and user-friendly applications.
-          </motion.p>
-          
-          <motion.div
-            className="flex flex-col space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <Link 
-                href="#projects" 
-                className="bg-gradient-to-r from-red-600 to-red-800 text-white px-8 py-3 rounded-full text-lg font-medium hover:opacity-90 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-red-900/30 flex-1 sm:flex-none text-center"
-              >
-                View Work
-              </Link>
-              <a
-                href="/cv.pdf"
-                download
-                className="bg-transparent border-2 border-red-600 text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-red-600/10 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-red-900/10 flex-1 sm:flex-none text-center"
-              >
-                Download CV
-              </a>
-            </div>
-            
-            {/* Social Icons */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-4"
-            >
-              <p className="text-gray-400 text-sm mb-2">Connect with me</p>
-              <SocialIcons />
-            </motion.div>
-          </motion.div>
-        </div>
-        
-        {/* Right side - Spline 3D Model */}
-        <motion.div 
-          className="w-full md:w-1/2 h-[400px] md:h-[70vh] flex items-center justify-center mt-12 md:mt-0 relative"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+        <motion.div
+          className="w-full md:w-1/2 z-10 text-center md:text-left mb-12 md:mb-0"
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <div className="relative w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-red-500/30 shadow-2xl bg-black">
-            <AnimatePresence>
-              {!splineLoaded && (
-                <motion.div 
-                  className="absolute inset-0 flex items-center justify-center"
-                  initial={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <LoadingAnimation size="md" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            <motion.div 
-              className="w-full h-full"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: splineLoaded ? 1 : 0 }}
-              transition={{ duration: 0.5 }}
+          <h1 className="text-4xl md:text-6xl font-bold mb-4">
+            Hi, I'm <span className="text-red-500">Your Name</span>
+          </h1>
+          <h2 className="text-2xl md:text-3xl text-gray-300 mb-6">
+            Web Developer & Designer
+          </h2>
+          <p className="text-gray-400 mb-8 max-w-lg">
+            I create beautiful, responsive websites and applications with modern
+            technologies.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+            <a
+              href="#contact"
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-300"
             >
-              {isMounted && (
-                <Spline
-                  scene="https://prod.spline.design/zChGX7xTEslLRtDy/scene.splinecode"
-                  className="w-full h-full scale-150"
-                  onLoad={handleSplineLoad}
-                />
-              )}
-            </motion.div>
+              Contact Me
+            </a>
+            <a
+              href="#projects"
+              className="px-6 py-3 bg-transparent border-2 border-white text-white hover:bg-white hover:text-black rounded-lg font-medium transition-colors duration-300"
+            >
+              View My Work
+            </a>
           </div>
         </motion.div>
-      </motion.div>
-      
-      {/* Decorative elements */}
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-red-500 rounded-full flex justify-center p-1">
-          <motion.div
-            className="w-1 h-2 bg-red-500 rounded-full"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          />
+
+        {/* Right side - 3D Spline Model (Circular) */}
+<motion.div
+  className="w-full md:w-1/2 aspect-square max-w-[500px] mx-auto relative"
+  initial={{ opacity: 0, x: 50 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.5, delay: 0.2 }}
+>
+  {isLoading && <SplineLoader />}
+  <div 
+    className={`w-full h-full transition-opacity duration-500 ${
+      !isLoading ? 'opacity-100' : 'opacity-0'
+    }`}
+  >
+    {error ? (
+      <div className="w-full h-full flex items-center justify-center bg-gray-900/50 rounded-full">
+        <p className="text-gray-400 text-center p-4">{error}</p>
+      </div>
+    ) : (
+      <div className="w-full h-full relative">
+        {/* Circular mask for the Spline model */}
+        <div className="absolute inset-0 rounded-full overflow-hidden border-2 border-red-500/30">
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="relative w-full h-full">
+              <div className="absolute inset-0 w-full h-full" style={{
+                transform: 'scale(2.2) translate(18%, 0%)',
+                overflow: 'visible',
+                marginLeft: '5%'
+              }}>
+                <Spline
+                  scene="https://prod.spline.design/zChGX7xTEslLRtDy/scene.splinecode"
+                  onLoad={handleLoad}
+                  onError={handleError}
+                  style={{
+                    width: '100%',
+                    height: '100%'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
+        {/* Glow effect */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-500/10 to-transparent blur-xl opacity-70 -z-10"></div>
+      </div>
+    )}
+  </div>
+</motion.div>
       </div>
     </section>
   );

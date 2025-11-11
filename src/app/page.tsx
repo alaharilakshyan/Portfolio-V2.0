@@ -1,17 +1,10 @@
 // src/app/page.tsx
 "use client";
 
-import { useEffect, Suspense } from 'react';
+import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { Poppins, Space_Grotesk } from 'next/font/google';
 import Head from 'next/head';
-
-// Loading components for better UX
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center h-screen w-full bg-black">
-    <div className="w-12 h-12 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
-  </div>
-);
 
 // Load fonts with proper configuration
 const poppins = Poppins({
@@ -30,6 +23,52 @@ const spaceGrotesk = Space_Grotesk({
   adjustFontFallback: false,
 });
 
+// Simple loading spinner that matches the design system
+const LoadingSpinner = () => (
+  <div className="flex flex-col items-center justify-center h-screen w-full bg-black space-y-6">
+    <div className="relative w-24 h-24">
+      <div className="absolute inset-0 border-4 border-transparent border-t-red-500 rounded-full animate-spin"></div>
+      <div className="absolute inset-2 border-4 border-transparent border-b-blue-500 rounded-full animate-spin" style={{ animationDelay: '0.15s' }}></div>
+      <div className="absolute inset-4 border-4 border-transparent border-l-green-500 rounded-full animate-spin" style={{ animationDelay: '0.3s' }}></div>
+      <div className="absolute inset-0 m-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+    </div>
+    <div className="text-center">
+      <h2 className="text-xl font-bold text-white mb-2">Loading Portfolio</h2>
+      <div className="flex justify-center space-x-1">
+        {[...Array(3)].map((_, i) => (
+          <span 
+            key={i}
+            className="w-2 h-2 bg-white rounded-full inline-block"
+            style={{
+              animation: `bounce 1.4s infinite ${i * 0.16}s`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+    
+    <style jsx global>{`
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes bounce {
+        0%, 80%, 100% { 
+          transform: scale(0);
+        } 
+        40% { 
+          transform: scale(1.0);
+        }
+      }
+      .animate-spin-slow {
+        animation: spin 3s linear infinite;
+      }
+      .animate-spin-slow-reverse {
+        animation: spin 4s linear infinite reverse;
+      }
+    `}</style>
+  </div>
+);
+
 // Dynamic imports with better loading states
 const MotionBackground = dynamic(() => import('@/components/MotionBackground'), { 
   ssr: false,
@@ -44,12 +83,8 @@ const Navbar = dynamic(() => import('@/components/Navbar'), {
 });
 
 const Hero = dynamic(() => import('@/components/Hero'), { 
-  ssr: true,
-  loading: () => (
-    <section id="hero" className="min-h-screen flex items-center justify-center">
-      <LoadingSpinner />
-    </section>
-  )
+  ssr: false, // Disable SSR for Spline component
+  loading: () => <LoadingSpinner />,
 });
 
 const About = dynamic(() => import('@/components/About'), { 
@@ -70,19 +105,10 @@ const Skills = dynamic(() => import('@/components/Skills'), {
   )
 });
 
-const Work = dynamic(() => import('@/components/Work'), { 
+const Experience = dynamic(() => import('@/components/Experience'), { 
   ssr: true,
   loading: () => (
-    <section id="work" className="py-16 bg-gray-900">
-      <LoadingSpinner />
-    </section>
-  )
-});
-
-const Education = dynamic(() => import('@/components/Education'), { 
-  ssr: true,
-  loading: () => (
-    <section id="education" className="py-16 bg-gray-900">
+    <section id="experience" className="py-20 bg-bg">
       <LoadingSpinner />
     </section>
   )
@@ -106,56 +132,42 @@ const Contact = dynamic(() => import('@/components/Contact'), {
   )
 });
 
+const CustomCursor = dynamic(() => import('@/components/CustomCursor'), {
+  ssr: false,
+});
 
-export default function Home() {
-  useEffect(() => {
-    // Smooth scroll for anchor links
-    const handleAnchorClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const anchor = target.closest('a[href^="#"]');
-      
-      if (anchor) {
-        e.preventDefault();
-        const targetId = anchor.getAttribute('href');
-        if (targetId) {
-          const element = document.querySelector(targetId);
-          if (element) {
-            element.scrollIntoView({ 
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
-        }
-      }
-    };
-
-    document.addEventListener('click', handleAnchorClick);
-    return () => document.removeEventListener('click', handleAnchorClick);
-  }, []);
-
+function HomeContent() {
   return (
-    <div className={`min-h-screen bg-gray-900 text-white ${poppins.variable} font-sans overflow-x-hidden`}>
+    <div className={`${poppins.variable} ${spaceGrotesk.variable} font-sans min-h-screen bg-bg text-text`}>
       <Head>
-        <title>Your Name - Portfolio</title>
-        <meta name="description" content="Professional portfolio showcasing my work and skills" />
+        <title>My Portfolio</title>
+        <meta name="description" content="Welcome to my portfolio" />
         <meta name="theme-color" content="#000000" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <CustomCursor />
       <MotionBackground />
       <Navbar />
       
-      <div className="relative z-10">
+      <main className="relative z-10">
         <Suspense fallback={<LoadingSpinner />}>
           <Hero />
           <About />
           <Skills />
-          <Work />
-          <Education />
+          <Experience />
           <Projects />
           <Contact />
         </Suspense>
-      </div>
+      </main>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <HomeContent />
+    </Suspense>
   );
 }
