@@ -1,0 +1,18 @@
+/* Smooth scrolling for the whole document */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem; /* Account for fixed header */
+}
+
+/* Better focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Selection styles */
+::selection {
+  background: var(--color-primary);
+  color: white;
+}
