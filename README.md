@@ -1,8 +1,4 @@
-Here’s your **complete, copy-ready `README.md` file** for your portfolio repository:
 
----
-
-````markdown
 # 🌐 Portfolio-V2.0  
 *A sleek personal portfolio website by Lakshyan*
 
@@ -46,7 +42,7 @@ Built with a clean dark-theme aesthetic and interactive animations, it’s desig
    ```bash
    git clone https://github.com/alaharilakshyan/Portfolio-V2.0.git
    cd Portfolio-V2.0
-````
+
 
 2. **Install dependencies**
 
@@ -134,10 +130,4 @@ If you’d like to connect, collaborate, or discuss opportunities, feel free to 
 
 **Developed by [Lakshyan Alahari](https://github.com/alaharilakshyan)**
 
-```
 
----
-
-Would you like me to include **live demo and preview images** sections (e.g., screenshots and `Live Demo → https://portfolio-v2-lakshyan.vercel.app`)?  
-I can add those too for a more complete and professional GitHub README.
-```
