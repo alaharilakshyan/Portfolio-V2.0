@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FiMail, FiMapPin, FiGithub, FiLinkedin, FiTwitter, FiSend } from 'react-icons/fi';
 
@@ -8,6 +8,7 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    subject: 'Contact Form Submission',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,14 +22,32 @@ const Contact = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const form = useRef<HTMLFormElement>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
 
     try {
-      // Replace with your form submission logic
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send message');
+      }
       
       setSubmitStatus({
         success: true,
@@ -39,12 +58,15 @@ const Contact = () => {
       setFormData({
         name: '',
         email: '',
+        subject: 'Contact Form Submission',
         message: ''
       });
+      
     } catch (error) {
+      console.error('Error sending message:', error);
       setSubmitStatus({
         success: false,
-        message: 'Failed to send message. Please try again.'
+        message: error instanceof Error ? error.message : 'Failed to send message. Please try again later.'
       });
     } finally {
       setIsSubmitting(false);
@@ -176,7 +198,7 @@ const Contact = () => {
               </div>
             )}
             
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form ref={form} onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1.5">Name</label>
                 <input
@@ -202,6 +224,20 @@ const Contact = () => {
                   required
                   className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:outline-none transition-all"
                   placeholder="your.email@example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-1.5">Subject</label>
+                <input
+                  type="text"
+                  id="subject"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:outline-none transition-all"
+                  placeholder="How can I help you?"
                 />
               </div>
               
